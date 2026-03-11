@@ -1,36 +1,52 @@
 <?php
+
 namespace App\Http\Controllers;
+
+use App\Models\Kelas;
+use App\Models\UserModel;
 use Illuminate\Http\Request;
+
 class UserManagementController extends Controller
 {
-    public function index()
+    public $userModel;
+    public $kelasModel;
+    public function __construct()
     {
-        $users = [
-            [
-                'nama' => 'Fitria Rahmadani',
-                'npm' => '2477051012',
-                'jurusan' => 'Ilmu Komputer',
-                'prodi' => 'D3 Manajemen Informatika'
-            ],
-             [
-                'nama' => 'Fitria Rahmadani',
-                'npm' => '2477051012',
-                'jurusan' => 'Ilmu Komputer',
-                'prodi' => 'D3 Manajemen Informatika'
-            ],
-             [
-                'nama' => 'Fitria Rahmadani',
-                'npm' => '2477051012',
-                'jurusan' => 'Ilmu Komputer',
-                'prodi' => 'D3 Manajemen Informatika'
-            ],
-             [
-                'nama' => 'Fitria Rahmadani',
-                'npm' => '2477051012',
-                'jurusan' => 'Ilmu Komputer',
-                'prodi' => 'D3 Manajemen Informatika'
-            ]
-        ];
+        $this->userModel = new UserModel();
+        $this->kelasModel = new Kelas();
+    }
+
+    
+public function index()
+    {
+        $users = $this->userModel->getUser();
         return view('user-management', compact('users'));
     }
+
+
+public function store(Request $request)
+    {
+        $this->userModel->create([
+            'nama' => $request->input('nama'),
+            'npm' => $request->input('npm'),
+            'kelas_id' => $request->input('kelas_id')
+        ]);
+
+        return redirect()->route('user-management.index');
+    }
+
+
+
+
+public function create()
+    {
+        $kelasModel = new Kelas();
+        $kelas = $kelasModel->getKelas();
+        $data = [
+            'judul' => 'Tambah User',
+            'kelas' => $kelas
+        ];
+        return view('user-management-create', $data);
+    }
+
 }
