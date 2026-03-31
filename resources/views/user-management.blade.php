@@ -1,81 +1,96 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>User Management</title>
+@extends('layouts.app')
 
-    <style>
-        body {
-            background-color: #1e3a8a; /* Biru */
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
+@section('content')
+    <h1>User Management</h1>
+    <p>ini adalah halaman user management</p>
 
-        h2 {
-            text-align: center;
-            color: white;
-            margin-top: 30px;
-        }
+    <!-- tombol tambah -->
+    <a class="btn btn-primary mb-3" href="{{ route('user-management.create') }}">
+        Tambah User
+    </a>
 
-        .container {
-            width: 80%;
-            margin: 40px auto;
-            background-color: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0px 5px 15px rgba(0,0,0,0.2);
-        }
+    <table border="1" cellpadding="10" style="margin: 0 auto;">
+        <tr style="background-color: #0000ff; color:white;">
+            <th>ID</th>
+            <th>Nama</th>
+            <th>NPM</th>
+            <th>Kelas</th>
+            <th>Aksi</th>
+        </tr>
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th {
-            background-color: #2563eb; /* Biru lebih terang */
-            color: white;
-            padding: 10px;
-        }
-
-        td {
-            padding: 10px;
-            text-align: center;
-        }
-
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-
-        table, th, td {
-            border: 1px solid #ccc;
-        }
-    </style>
-</head>
-<body>
-
-    <h2>Halaman User Management</h2>
-
-    <div class="container">
-        <table>
+        @foreach ($users as $user)
             <tr>
-                <th>Nama</th>
-                <th>NPM</th>
-                <th>Jurusan</th>
-                <th>Prodi</th>
-            </tr>
+                <td>{{ $user->id }}</td>
+                <td>{{ $user->name }}</td>
+                <td>{{ $user->npm }}</td>
+                <td>{{ $user->nama_kelas }}</td>
+                <td>
+                    <!-- tombol edit -->
+                    <button type="button" class="btn btn-primary"
+                        data-bs-toggle="modal"
+                        data-bs-target="#editModal{{ $user->id }}">
+                        Edit
+                    </button>
 
-            @foreach ($users as $user)
-            <tr>
-                <td>{{ $user['nama'] }}</td>
-                <td>{{ $user['npm'] }}</td>
-                <td>{{ $user['jurusan'] }}</td>
-                <td>{{ $user['prodi'] }}</td>
+                    <!-- tombol hapus -->
+                    <form action="{{ route('user-management.destroy', $user->id) }}" method="POST" style="display:inline;">
+                        @csrf
+                        @method('DELETE')
+                        <button class="btn btn-danger" type="submit">Hapus</button>
+                    </form>
+                </td>
             </tr>
-            @endforeach
+        @endforeach
+    </table>
 
-        </table>
+    <!-- MODAL EDIT -->
+    @foreach ($users as $user)
+    <div class="modal fade" id="editModal{{ $user->id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <form action="{{ route('user-management.update', $user->id) }}" method="POST">
+                        @csrf
+                        @method('PUT')
+
+                        <div class="mb-3">
+                            <label class="form-label">Nama</label>
+                            <input type="text" name="name" class="form-control" value="{{ $user->name }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">NPM</label>
+                            <input type="text" name="npm" class="form-control" value="{{ $user->npm }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Kelas</label>
+                            <select name="kelas_id" class="form-select">
+                                @foreach ($kelas as $k)
+                                    <option value="{{ $k->id }}" {{ $k->id == $user->kelas_id ? 'selected' : '' }}>
+                                        {{ $k->nama_kelas }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-success">Simpan</button>
+                        </div>
+
+                    </form>
+                </div>
+
+            </div>
+        </div>
     </div>
+    @endforeach
 
-</body>
-</html>
+@endsection

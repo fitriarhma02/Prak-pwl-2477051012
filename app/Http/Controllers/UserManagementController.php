@@ -10,24 +10,40 @@ class UserManagementController extends Controller
 {
     public $userModel;
     public $kelasModel;
+
     public function __construct()
     {
         $this->userModel = new UserModel();
         $this->kelasModel = new Kelas();
     }
 
-    
-public function index()
+    // ✅ READ (menampilkan data)
+    public function index()
     {
         $users = $this->userModel->getUser();
-        return view('user-management', compact('users'));
+        $kelas = $this->kelasModel->getKelas(); // penting untuk modal edit
+
+        return view('user-management', compact('users', 'kelas'));
     }
 
-
-public function store(Request $request)
+    // ✅ CREATE (tampil form)
+    public function create()
     {
+        $kelas = $this->kelasModel->getKelas();
+        return view('create-user', compact('kelas'));
+    }
+
+    // ✅ STORE (simpan data)
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'npm' => 'required|string|max:255',
+            'kelas_id' => 'required|exists:kelas,id'
+        ]);
+
         $this->userModel->create([
-            'nama' => $request->input('nama'),
+            'name' => $request->input('name'),
             'npm' => $request->input('npm'),
             'kelas_id' => $request->input('kelas_id')
         ]);
@@ -35,18 +51,32 @@ public function store(Request $request)
         return redirect()->route('user-management.index');
     }
 
-
-
-
-public function create()
+    // ✅ UPDATE (edit data)
+    public function update(Request $request, $id)
     {
-        $kelasModel = new Kelas();
-        $kelas = $kelasModel->getKelas();
-        $data = [
-            'judul' => 'Tambah User',
-            'kelas' => $kelas
-        ];
-        return view('user-management-create', $data);
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'npm' => 'required|string|max:255',
+            'kelas_id' => 'required|exists:kelas,id'
+        ]);
+
+        $user = UserModel::findOrFail($id);
+
+        $user->update([
+            'name' => $request->input('name'),
+            'npm' => $request->input('npm'),
+            'kelas_id' => $request->input('kelas_id')
+        ]);
+
+        return redirect()->route('user-management.index');
     }
 
+    // ✅ DELETE (hapus data)
+    public function destroy($id)
+    {
+        $user = UserModel::findOrFail($id);
+        $user->delete();
+
+        return redirect()->route('user-management.index');
+    }
 }
